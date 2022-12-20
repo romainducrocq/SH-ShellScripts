@@ -1,0 +1,29 @@
+#!/bin/bash
+
+assert () { if [ ${?} -ne 0 ]; then exit; fi; }
+
+DEV=""
+
+cd /media/${USER}/
+shopt -s nullglob
+DEVS=(*/)
+shopt -u nullglob
+
+if [ ${#DEVS[@]} -eq 0 ]; then
+    exit
+fi
+
+if [ ${#DEVS[@]} -eq 1 ]; then
+    DEV=${DEVS[0]}
+else
+    for i in $(seq 1 ${#DEVS[@]}); do
+        echo $i ${DEVS[$i-1]}
+    done
+    read -p "Device # " I
+    DEV=${DEVS[I-1]}
+fi
+
+assert $(sudo umount ${DEV})
+sudo rm -r ${DEV}
+
+echo Unmounted: $(pwd)/${DEV}

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+assert () { if [ ${?} -ne 0 ]; then exit; fi; }
+
+DEV=""
+
+cd /media/${USER}/
+shopt -s nullglob
+DEVS=($(sudo fdisk -l | grep -e "Disk /dev/sd" -e "Disk /dev/hd" | cut -d / -f 3 | cut -d : -f 1))
+shopt -u nullglob
+
+if [ ${#DEVS[@]} -eq 0 ]; then
+    exit
+fi
+
+if [ ${#DEVS[@]} -eq 1 ]; then
+    DEV=${DEVS[0]}
+else
+    for i in $(seq 1 ${#DEVS[@]}); do
+        echo $i ${DEVS[$i-1]}
+    done
+    read -p "Device # " I
+    DEV=${DEVS[I-1]}
+fi
+
+sudo mkdir -p ${DEV}
+assert $(sudo mount /dev/${DEV} ${DEV})
+
+cd ${DEV}
+echo Mounted: $(pwd)
+xclip -se C <<< "cd "$(pwd)
